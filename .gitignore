@@ -121,3 +121,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# For task 8_ephem_bot.py
+settings.py
