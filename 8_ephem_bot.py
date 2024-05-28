@@ -12,52 +12,63 @@
   бота отвечать, в каком созвездии сегодня находится планета.
 
 """
-import logging, ephem, settings
-from datetime import date
+import logging
+import ephem
+import settings
+import locale
+from datetime import datetime
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 logging.basicConfig(format='%(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO,
                     filename='bot.log')
 
-def greet_user(update, context):  
+planets = {"Mercury": ephem.Mercury, 
+            "Venus": ephem.Venus, 
+            "Mars" : ephem.Mars, 
+            "Saturn": ephem.Saturn, 
+            "Uranus": ephem.Uranus, 
+            "Neptune": ephem.Neptune,
+            "Pluto": ephem.Pluto,
+            "Moon": ephem.Moon,
+            "Sun": ephem.Sun,
+            "Jupiter": ephem.Jupiter
+            }
+
+def greet_user(update, context):  # update - это то, что поступило от пользователя Telegram. Context - это спец. штука с помощью которой мы можем изнутри функции отдавать команды боту
     print('Вызван /start')
     print(update.message.reply_text('Здравствуй пользователь!'))
 
-def name_planet(update, context):  
+def planet_const(update, context):  # вызов команды /planet
     print('Вызван /planet')
-    print(update.message.reply_text('Введите название планеты на английском -\
- Mercury, Venus, Mars, Jupiter, Saturn, Uranus, Neptune, Pluto'))
+    update.message.reply_text("Введите название объекта Солнечной системы -\
+ Mercury, Venus, Mars, Jupiter, Saturn, Uranus, Neptune, Pluto, Moon, Sun")
+    
+def get_constelletion(planet_name):  # функция обрабатывает сообщение пользователя с названием планеты
+    locale.setlocale(locale.LC_TIME, 'ru_RU')
+    current_date = datetime.now().strftime('%d.%m.%Y %H:%M')  # переменная для корректной работы с ephem
+    current_planet = planets[planet_name](current_date)
+    current_date = datetime.now().strftime('%A %d.%m.%Y %H:%M')  # переменная с отображением дня недели на кириллице
+    print(current_planet, current_date, sep='\n')
+    return ephem.constellation(current_planet), current_date
 
-def talk_to_me(update, context):
+def talk_to_me(update, context):  # функция принимает и распределяет все сообщения от пользователя
     user_text = update.message.text
     print(user_text)
-    
-    planets = {"Mercury": ephem.Mercury("2024/05/27"), 
-                "Venus": ephem.Venus("2024/05/27"), 
-                "Mars" : ephem.Mars("2024/05/27"), 
-                "Saturn": ephem.Saturn("2024/05/27"), 
-                "Uranus": ephem.Uranus("2024/05/27"), 
-                "Neptune": ephem.Neptune("2024/05/27"),
-                "Pluto": ephem.Pluto("2024/05/27")
-                }
-    
-    if user_text in planets:  # если сообщение от пользователя название планеты из словаря
-        planet_input = user_text.lower().capitalize()
-        print(planet_input)
-        if planet_input in planets:
-            const = ephem.constellation(planets[planet_input])
-            update.message.reply_text(f"Планета: {planet_input}")
-            update.message.reply_text(f"Сегодня 27.05.2024 в созвездии: {const[1]}")
-            print(const)
+    if user_text.lower().capitalize() in planets:
+        planet_name = user_text
+        const, current_date = get_constelletion(planet_name)  # получаем переменные из функции get_constelletion(planet_name)
+        update.message.reply_text(f"Сегодня: {current_date}")
+        update.message.reply_text(f"Планета {planet_name} в созвездии: {const[1]}")
+        print(const)
     else:
-        update.message.reply_text(f'Сам ты {user_text}')  # если сообщение от пользователя не содержит планету
-
+        update.message.reply_text(f"Хотите узнать про созвездия, нажмите: {'/planet'}")
+    
 def main():
     mybot = Updater(settings.API_KEY, use_context = True)
     
-    dp = mybot.dispatcher 
+    dp = mybot.dispatcher  # в переменную dp кладём это, чтобы в дальнейшем не набирать длинное название
     dp.add_handler(CommandHandler("start", greet_user))
-    dp.add_handler(CommandHandler("planet", name_planet))
+    dp.add_handler(CommandHandler("planet", planet_const))
     dp.add_handler(MessageHandler(Filters.text, talk_to_me))
     
     logging.info("Bot started")
