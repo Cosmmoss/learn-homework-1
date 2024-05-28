@@ -44,7 +44,7 @@ def planet_const(update, context):  # вызов команды /planet
     update.message.reply_text("Введите название объекта Солнечной системы -\
  Mercury, Venus, Mars, Jupiter, Saturn, Uranus, Neptune, Pluto, Moon, Sun")
     
-def get_constelletion(planet_name):  # функция обрабатывает сообщение пользователя с названием планеты
+def get_constellation(planet_name):  # функция обрабатывает сообщение пользователя с названием планеты
     current_date = datetime.now().strftime('%d.%m.%Y %H:%M')  # переменная для корректной работы с ephem
     current_planet = planets[planet_name](current_date)  # переменная планеты с обработкой
     current_date = datetime.now().strftime('%A %d.%m.%Y %H:%M')  # переменная с отображением дня недели на кириллице
@@ -55,7 +55,7 @@ def talk_to_me(update, context):  # функция принимает и рас�
     print(user_text)  
     if user_text.lower().capitalize() in planets:  # если текст сообщения от пользователя есть в словаре с планетами
         planet_name = user_text  # передаём в переменную текст сообщения
-        const, current_date = get_constelletion(planet_name)  # получаем переменные из функции get_constelletion(planet_name)
+        const, current_date = get_constellation(planet_name)  # получаем переменные из функции get_constelletion(planet_name)
         update.message.reply_text(f"Сегодня: {current_date}")  # вывод пользователю даты
         update.message.reply_text(f"Планета {planet_name} в созвездии: {const[1]}")  # вывод пользователю созвездия
         print(const, current_date, sep='\n')  # вывод в консоль созвездия, даты
