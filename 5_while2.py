@@ -14,14 +14,24 @@
     Программа: Программирую
     
 """
+questions_and_answers = {
+          "Как дела?": "Хорошо!", 
+          "Что делаешь?": "Программирую", 
+          "Какой твой любимый цвет?": "Зелёный"}
 
-questions_and_answers = {}
-
-def ask_user(answers_dict):
-    """
-    Замените pass на ваш код
-    """
-    pass
+def question_and_answer():
     
+    def ask_user():
+        user_asks = input('Пользователь: ')
+        answer = questions_and_answers.get(user_asks, 'Задай другой вопрос, на этот нет ответа')
+        return answer
+    
+    while True:
+        print('Программа: Что ты хочешь спросить у меня?')
+        answer = ask_user()
+        print(f'Программа:{answer}')
+        if int(input('Программа: Если вопросов больше нет нажми 0, если есть 1: ')) == 0:
+            break
+                    
 if __name__ == "__main__":
-    ask_user(questions_and_answers)
+    question_and_answer()
