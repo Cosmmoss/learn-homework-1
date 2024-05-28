@@ -21,6 +21,7 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 logging.basicConfig(format='%(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO,
                     filename='bot.log')
+locale.setlocale(locale.LC_TIME, 'ru_RU')  # что бы генерировать кирилические дни недели
 
 planets = {"Mercury": ephem.Mercury, 
             "Venus": ephem.Venus, 
@@ -36,7 +37,7 @@ planets = {"Mercury": ephem.Mercury,
 
 def greet_user(update, context):  # update - это то, что поступило от пользователя Telegram. Context - это спец. штука с помощью которой мы можем изнутри функции отдавать команды боту
     print('Вызван /start')
-    print(update.message.reply_text('Здравствуй пользователь!'))
+    update.message.reply_text('Здравствуй пользователь!')
 
 def planet_const(update, context):  # вызов команды /planet
     print('Вызван /planet')
@@ -44,22 +45,20 @@ def planet_const(update, context):  # вызов команды /planet
  Mercury, Venus, Mars, Jupiter, Saturn, Uranus, Neptune, Pluto, Moon, Sun")
     
 def get_constelletion(planet_name):  # функция обрабатывает сообщение пользователя с названием планеты
-    locale.setlocale(locale.LC_TIME, 'ru_RU')
     current_date = datetime.now().strftime('%d.%m.%Y %H:%M')  # переменная для корректной работы с ephem
-    current_planet = planets[planet_name](current_date)
+    current_planet = planets[planet_name](current_date)  # переменная планеты с обработкой
     current_date = datetime.now().strftime('%A %d.%m.%Y %H:%M')  # переменная с отображением дня недели на кириллице
-    print(current_planet, current_date, sep='\n')
-    return ephem.constellation(current_planet), current_date
+    return ephem.constellation(current_planet), current_date  # функция возвращает созвездие и дату
 
 def talk_to_me(update, context):  # функция принимает и распределяет все сообщения от пользователя
     user_text = update.message.text
-    print(user_text)
-    if user_text.lower().capitalize() in planets:
-        planet_name = user_text
+    print(user_text)  
+    if user_text.lower().capitalize() in planets:  # если текст сообщения от пользователя есть в словаре с планетами
+        planet_name = user_text  # передаём в переменную текст сообщения
         const, current_date = get_constelletion(planet_name)  # получаем переменные из функции get_constelletion(planet_name)
-        update.message.reply_text(f"Сегодня: {current_date}")
-        update.message.reply_text(f"Планета {planet_name} в созвездии: {const[1]}")
-        print(const)
+        update.message.reply_text(f"Сегодня: {current_date}")  # вывод пользователю даты
+        update.message.reply_text(f"Планета {planet_name} в созвездии: {const[1]}")  # вывод пользователю созвездия
+        print(const, current_date, sep='\n')  # вывод в консоль созвездия, даты
     else:
         update.message.reply_text(f"Хотите узнать про созвездия, нажмите: {'/planet'}")
     
